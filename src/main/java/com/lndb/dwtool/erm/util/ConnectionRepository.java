@@ -17,7 +17,6 @@ import java.util.Properties;
 
 import com.lndb.dwtool.erm.db.ConnectionDetail;
 import com.lndb.dwtool.erm.db.DatabaseConnection;
-import com.lndb.dwtool.erm.web.ConnectionSpec;
 
 public class ConnectionRepository {
 	private static final String PROP_PWD = "pwd";
@@ -90,8 +89,8 @@ public class ConnectionRepository {
 		writer.close();
 	}
 
-	public static synchronized void saveConnection(ConnectionSpec spec) throws IOException {
-		String conName = spec.getConnectionName();
+	public static synchronized void saveConnection(ConnectionDetail spec) throws IOException {
+		String conName = spec.getName();
 		String conNameList = properties.getProperty(PROPERTY_CONNECTIONS);
 		if (conNameList == null) {
 			conNameList = conName;
@@ -103,10 +102,10 @@ public class ConnectionRepository {
 		}
 		properties.put(PROPERTY_CONNECTIONS, conNameList);
 		properties.put(conName + "." + PROP_DRIVER, "com.mysql.jdbc.Driver");
-		properties.put(conName + "." + PROP_URL, spec.getConnectionString());
+		properties.put(conName + "." + PROP_URL, spec.getUrl());
 		properties.put(conName + "." + PROP_SCHEMA, spec.getSchema());
-		properties.put(conName + "." + PROP_USER, spec.getUserName());
-		properties.put(conName + "." + PROP_PWD, DESEncryptor.encrypt(spec.getUserPassword()));
+		properties.put(conName + "." + PROP_USER, spec.getUserId());
+		properties.put(conName + "." + PROP_PWD, DESEncryptor.encrypt(spec.getPassword()));
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(repositoryPath));
 		writer.write(PROPERTY_CONNECTIONS + " = " + conNameList);

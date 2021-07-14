@@ -11,9 +11,12 @@ export class Connections extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { connections: [], status: "", req: { connectionName: "", driver: "", connectionString: "", schema: "", userName: "", userPassword: "", valid: false }, isLoaded: false };
+		this.state = { connections: [], status: "", req: { name: "", driver: "", url: "", schema: "", userId: "", password: "", valid: false }, saved: false, isLoaded: false };
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.submitChange = this.submitChange.bind(this);
+		this.updateConnection = this.updateConnection.bind(this);
+		this.deleteConnection = this.deleteConnection.bind(this);
+		this.resetModal = this.resetModal.bind(this);
 	}
 
 	componentDidMount() {
@@ -25,7 +28,6 @@ export class Connections extends React.Component {
 						isLoaded: true,
 						connections: result
 					});
-					console.log(result)
 				},
 				(error) => {
 					this.setState({
@@ -34,6 +36,13 @@ export class Connections extends React.Component {
 					});
 				}
 			)
+	}
+	resetModal(event) {
+		var myModal = new bootstrap.Modal(document.getElementById('newConnModal'), {
+			keyboard: false
+		})
+		this.setState({ req: { name: "", driver: "", url: "", schema: "", userId: "", password: "", valid: false }, saved: false });
+		myModal.show();
 	}
 
 	handleInputChange(event) {
@@ -43,14 +52,25 @@ export class Connections extends React.Component {
 		let newReq = this.state.req;
 		newReq[name] = value;
 		this.setState({
-			req: newReq
+			req: newReq,
+			saved: false
 		});
 	}
 	submitChange(event) {
 		this.setState({
 			status: "Saving & testing the connection...",
 		});
-		fetch("/newConnection", {
+
+		var connections = this.state.connections;
+		var newConn = this.state.req;
+		var match = connections.filter(function(value, index) {
+			return newConn.name == value.name;
+		});
+		var newConns = this.state.connections;
+		if (match.length == 0) {
+			newConns.push(this.state.req);
+		}
+		fetch("/connections", {
 			method: 'POST', body: JSON.stringify(this.state.req), headers: {
 				'Content-Type': 'application/json'
 			},
@@ -59,29 +79,60 @@ export class Connections extends React.Component {
 			.then(
 				(result) => {
 					this.setState({
-						isLoaded: true,
+						saved: true,
 						status: result.valid ? "Saved successfully." : "Connection test failed",
-						req: result
+						req: result,
+						connections: newConns
 					});
 				},
 				(error) => {
 					this.setState({
-						isLoaded: true,
+						saved: false,
 						status: "Save failed.",
 						error
 					});
 				}
 			)
 	}
+	updateConnection(idx, event) {
+		var newReq = this.state.connections[idx]
+		this.setState({
+			req: newReq,
+			saved: false
+		});
+		var myModal = new bootstrap.Modal(document.getElementById('newConnModal'), {
+			keyboard: false
+		})
+		myModal.show();
+	}
+	deleteConnection(idx, event) {
+		var connections = this.state.connections;
+		var req = this.state.connections[idx]
+		var filtered = connections.filter(function(value, index) {
+			return index != idx;
+		});
+		fetch("/connections", {
+			method: 'DELETE', body: JSON.stringify(req), headers: {
+				'Content-Type': 'application/json'
+			},
+		})
+		this.setState({
+			saved: true,
+			status: "Deleted",
+			connections: filtered
+		});
+	}
 	render() {
+		var updateConnection = this.updateConnection;
+		var deleteConnection = this.deleteConnection;
 		if (this.state.isLoaded) {
-			var connections = this.state.connections.map(function(conn) {
+			var connections = this.state.connections.map(function(conn, idx) {
 				return (<tr key={conn.name}>
 					<td scope="row">{conn.name}</td>
 					<td scope="row">{conn.url}</td>
 					<td scope="row">{conn.schema}</td>
-					<td scope="row">{conn.user}</td>
-					<td scope="row"><button type="button" className="btn btn-sm btn-secondary">test</button> <button type="button" className="btn btn-sm btn-secondary">edit</button> <button type="button" className="btn btn-sm btn-secondary">delete</button></td>
+					<td scope="row">{conn.userId}</td>
+					<td scope="row"><button type="button" className="btn btn-sm btn-secondary">test</button> <button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button> <button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
 				</tr>);
 			}
 			);
@@ -92,36 +143,36 @@ export class Connections extends React.Component {
 						<div className="modal-content">
 							<div className="modal-header">
 								<h5 className="modal-title" id="newConnModalLabel">New Connection</h5>
-								<p>{this.status}</p>
 								<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 							</div>
 							<div className="modal-body">
 								<form>
 									<div className="mb-3">
-										<label htmlFor="connectionName" className="form-label">Connection Name</label>
-										<input type="text" className="form-control" id="connectionName" aria-describedby="connectionNameHelp" value={this.state.req.connectionName} onChange={this.handleInputChange} />
+										<label htmlFor="name" className="form-label">Connection Name</label>
+										<input type="text" className="form-control" id="name" aria-describedby="nameHelp" value={this.state.req.name} onChange={this.handleInputChange} disabled={this.state.saved} />
 									</div>
 									<div className="mb-3">
-										<label htmlFor="connectionString" className="form-label">Connection String</label>
-										<input type="text" className="form-control" id="connectionString" aria-describedby="connectionStringHelp" value={this.state.req.connectionString} onChange={this.handleInputChange} />
-										<div id="connectionStringHelp" className="form-text">jdbc:mysql://eacloud-mysqlserver.mysql.database.azure.com:3306/eforms?useSSL=true</div>
+										<label htmlFor="url" className="form-label">Connection String</label>
+										<input type="text" className="form-control" id="url" aria-describedby="urlHelp" value={this.state.req.url} onChange={this.handleInputChange} />
+										<div id="urlHelp" className="form-text">jdbc:mysql://localhost:3306/edp_config</div>
 									</div>
 									<div className="mb-3">
 										<label htmlFor="schema" className="form-label">Schema</label>
 										<input type="text" className="form-control" id="schema" aria-describedby="schemaHelp" value={this.state.req.schema} onChange={this.handleInputChange} />
 									</div>
 									<div className="mb-3">
-										<label htmlFor="userName" className="form-label">User</label>
-										<input type="text" className="form-control" id="userName" aria-describedby="userNameHelp" value={this.state.req.userName} onChange={this.handleInputChange} />
+										<label htmlFor="userId" className="form-label">User</label>
+										<input type="text" className="form-control" id="userId" aria-describedby="userIdHelp" value={this.state.req.userId} onChange={this.handleInputChange} />
 									</div>
 									<div className="mb-3">
-										<label htmlFor="userPassword" className="form-label">Password</label>
-										<input type="password" className="form-control" id="userPassword" value={this.state.req.userPassword} onChange={this.handleInputChange} />
+										<label htmlFor="password" className="form-label">Password</label>
+										<input type="password" className="form-control" id="password" value={this.state.req.password} onChange={this.handleInputChange} />
 									</div>
 								</form>
 							</div>
 							<div className="modal-footer">
-								<button type="button" className="btn btn-primary" onClick={this.submitChange} disabled={this.state.req.valid}>Save</button>
+								{this.state.status}
+								<button type="button" className="btn btn-primary" onClick={this.submitChange} disabled={this.state.saved}>Save</button>
 								<button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 							</div>
 						</div>
@@ -132,7 +183,7 @@ export class Connections extends React.Component {
 				<div className="row" ><div className="col-lg-12">
 					<h4>Database Connections</h4>
 					{newConnModal}
-					<button type="button" className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#newConnModal" >
+					<button type="button" className="btn btn-secondary" onClick={this.resetModal} >
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus-circle" viewBox="0 0 16 16">
 							<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
 							<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />

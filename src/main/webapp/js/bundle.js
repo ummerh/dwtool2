@@ -38577,18 +38577,22 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       connections: [],
       status: "",
       req: {
-        connectionName: "",
+        name: "",
         driver: "",
-        connectionString: "",
+        url: "",
         schema: "",
-        userName: "",
-        userPassword: "",
+        userId: "",
+        password: "",
         valid: false
       },
+      saved: false,
       isLoaded: false
     };
     _this.handleInputChange = _this.handleInputChange.bind(_assertThisInitialized(_this));
     _this.submitChange = _this.submitChange.bind(_assertThisInitialized(_this));
+    _this.updateConnection = _this.updateConnection.bind(_assertThisInitialized(_this));
+    _this.deleteConnection = _this.deleteConnection.bind(_assertThisInitialized(_this));
+    _this.resetModal = _this.resetModal.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -38604,14 +38608,32 @@ var Connections = /*#__PURE__*/function (_React$Component) {
           isLoaded: true,
           connections: result
         });
-
-        console.log(result);
       }, function (error) {
         _this2.setState({
           isLoaded: true,
           error: error
         });
       });
+    }
+  }, {
+    key: "resetModal",
+    value: function resetModal(event) {
+      var myModal = new bootstrap.Modal(document.getElementById('newConnModal'), {
+        keyboard: false
+      });
+      this.setState({
+        req: {
+          name: "",
+          driver: "",
+          url: "",
+          schema: "",
+          userId: "",
+          password: "",
+          valid: false
+        },
+        saved: false
+      });
+      myModal.show();
     }
   }, {
     key: "handleInputChange",
@@ -38622,7 +38644,8 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       var newReq = this.state.req;
       newReq[name] = value;
       this.setState({
-        req: newReq
+        req: newReq,
+        saved: false
       });
     }
   }, {
@@ -38633,7 +38656,18 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       this.setState({
         status: "Saving & testing the connection..."
       });
-      fetch("/newConnection", {
+      var connections = this.state.connections;
+      var newConn = this.state.req;
+      var match = connections.filter(function (value, index) {
+        return newConn.name == value.name;
+      });
+      var newConns = this.state.connections;
+
+      if (match.length == 0) {
+        newConns.push(this.state.req);
+      }
+
+      fetch("/connections", {
         method: 'POST',
         body: JSON.stringify(this.state.req),
         headers: {
@@ -38643,23 +38677,61 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         return res.json();
       }).then(function (result) {
         _this3.setState({
-          isLoaded: true,
+          saved: true,
           status: result.valid ? "Saved successfully." : "Connection test failed",
-          req: result
+          req: result,
+          connections: newConns
         });
       }, function (error) {
         _this3.setState({
-          isLoaded: true,
+          saved: false,
           status: "Save failed.",
           error: error
         });
       });
     }
   }, {
+    key: "updateConnection",
+    value: function updateConnection(idx, event) {
+      var newReq = this.state.connections[idx];
+      this.setState({
+        req: newReq,
+        saved: false
+      });
+      var myModal = new bootstrap.Modal(document.getElementById('newConnModal'), {
+        keyboard: false
+      });
+      myModal.show();
+    }
+  }, {
+    key: "deleteConnection",
+    value: function deleteConnection(idx, event) {
+      var connections = this.state.connections;
+      var req = this.state.connections[idx];
+      var filtered = connections.filter(function (value, index) {
+        return index != idx;
+      });
+      fetch("/connections", {
+        method: 'DELETE',
+        body: JSON.stringify(req),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      this.setState({
+        saved: true,
+        status: "Deleted",
+        connections: filtered
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
+      var updateConnection = this.updateConnection;
+      var deleteConnection = this.deleteConnection;
+
       if (this.state.isLoaded) {
-        var connections = this.state.connections.map(function (conn) {
+        var connections = this.state.connections.map(function (conn, idx) {
           return /*#__PURE__*/React.createElement("tr", {
             key: conn.name
           }, /*#__PURE__*/React.createElement("td", {
@@ -38670,17 +38742,19 @@ var Connections = /*#__PURE__*/function (_React$Component) {
             scope: "row"
           }, conn.schema), /*#__PURE__*/React.createElement("td", {
             scope: "row"
-          }, conn.user), /*#__PURE__*/React.createElement("td", {
+          }, conn.userId), /*#__PURE__*/React.createElement("td", {
             scope: "row"
           }, /*#__PURE__*/React.createElement("button", {
             type: "button",
             className: "btn btn-sm btn-secondary"
           }, "test"), " ", /*#__PURE__*/React.createElement("button", {
             type: "button",
-            className: "btn btn-sm btn-secondary"
+            className: "btn btn-sm btn-secondary",
+            onClick: updateConnection.bind(this, idx)
           }, "edit"), " ", /*#__PURE__*/React.createElement("button", {
             type: "button",
-            className: "btn btn-sm btn-secondary"
+            className: "btn btn-sm btn-secondary",
+            onClick: deleteConnection.bind(this, idx)
           }, "delete")));
         });
         var newConnModal = /*#__PURE__*/React.createElement("div", {
@@ -38698,7 +38772,7 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         }, /*#__PURE__*/React.createElement("h5", {
           className: "modal-title",
           id: "newConnModalLabel"
-        }, "New Connection"), /*#__PURE__*/React.createElement("p", null, this.status), /*#__PURE__*/React.createElement("button", {
+        }, "New Connection"), /*#__PURE__*/React.createElement("button", {
           type: "button",
           className: "btn-close",
           "data-bs-dismiss": "modal",
@@ -38708,31 +38782,32 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("div", {
           className: "mb-3"
         }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "connectionName",
+          htmlFor: "name",
           className: "form-label"
         }, "Connection Name"), /*#__PURE__*/React.createElement("input", {
           type: "text",
           className: "form-control",
-          id: "connectionName",
-          "aria-describedby": "connectionNameHelp",
-          value: this.state.req.connectionName,
-          onChange: this.handleInputChange
+          id: "name",
+          "aria-describedby": "nameHelp",
+          value: this.state.req.name,
+          onChange: this.handleInputChange,
+          disabled: this.state.saved
         })), /*#__PURE__*/React.createElement("div", {
           className: "mb-3"
         }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "connectionString",
+          htmlFor: "url",
           className: "form-label"
         }, "Connection String"), /*#__PURE__*/React.createElement("input", {
           type: "text",
           className: "form-control",
-          id: "connectionString",
-          "aria-describedby": "connectionStringHelp",
-          value: this.state.req.connectionString,
+          id: "url",
+          "aria-describedby": "urlHelp",
+          value: this.state.req.url,
           onChange: this.handleInputChange
         }), /*#__PURE__*/React.createElement("div", {
-          id: "connectionStringHelp",
+          id: "urlHelp",
           className: "form-text"
-        }, "jdbc:mysql://eacloud-mysqlserver.mysql.database.azure.com:3306/eforms?useSSL=true")), /*#__PURE__*/React.createElement("div", {
+        }, "jdbc:mysql://localhost:3306/edp_config")), /*#__PURE__*/React.createElement("div", {
           className: "mb-3"
         }, /*#__PURE__*/React.createElement("label", {
           htmlFor: "schema",
@@ -38747,33 +38822,33 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         })), /*#__PURE__*/React.createElement("div", {
           className: "mb-3"
         }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "userName",
+          htmlFor: "userId",
           className: "form-label"
         }, "User"), /*#__PURE__*/React.createElement("input", {
           type: "text",
           className: "form-control",
-          id: "userName",
-          "aria-describedby": "userNameHelp",
-          value: this.state.req.userName,
+          id: "userId",
+          "aria-describedby": "userIdHelp",
+          value: this.state.req.userId,
           onChange: this.handleInputChange
         })), /*#__PURE__*/React.createElement("div", {
           className: "mb-3"
         }, /*#__PURE__*/React.createElement("label", {
-          htmlFor: "userPassword",
+          htmlFor: "password",
           className: "form-label"
         }, "Password"), /*#__PURE__*/React.createElement("input", {
           type: "password",
           className: "form-control",
-          id: "userPassword",
-          value: this.state.req.userPassword,
+          id: "password",
+          value: this.state.req.password,
           onChange: this.handleInputChange
         })))), /*#__PURE__*/React.createElement("div", {
           className: "modal-footer"
-        }, /*#__PURE__*/React.createElement("button", {
+        }, this.state.status, /*#__PURE__*/React.createElement("button", {
           type: "button",
           className: "btn btn-primary",
           onClick: this.submitChange,
-          disabled: this.state.req.valid
+          disabled: this.state.saved
         }, "Save"), /*#__PURE__*/React.createElement("button", {
           type: "button",
           className: "btn btn-secondary",
@@ -38786,8 +38861,7 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         }, /*#__PURE__*/React.createElement("h4", null, "Database Connections"), newConnModal, /*#__PURE__*/React.createElement("button", {
           type: "button",
           className: "btn btn-secondary",
-          "data-bs-toggle": "modal",
-          "data-bs-target": "#newConnModal"
+          onClick: this.resetModal
         }, /*#__PURE__*/React.createElement("svg", {
           xmlns: "http://www.w3.org/2000/svg",
           width: "16",
