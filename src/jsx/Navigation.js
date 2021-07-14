@@ -19,7 +19,7 @@ export class Navigation extends React.Component {
 				<div className="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul className="navbar-nav mr-auto">
 						<li className="nav-item"><a className="nav-link" href={this.props.path + "/#/connections"}>Connections</a></li>
-						<li className="nav-item"><a className="nav-link" href={this.props.path + "/#/images/jackson"}>Excel DB</a></li>
+						<li className="nav-item"><a className="nav-link" href={this.props.path + "/#/images/jackson"}>Images</a></li>
 						<li className="nav-item"><a className="nav-link disabled" href="#"
 							aria-disabled="true">Code Assists</a></li>
 					</ul>

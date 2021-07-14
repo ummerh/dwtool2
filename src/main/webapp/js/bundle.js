@@ -38574,19 +38574,46 @@ var Connections = /*#__PURE__*/function (_React$Component) {
 
     _this = _super.call(this, props);
     _this.state = {
-      status: "OK",
-      connection: {
-        user: "",
-        password: "",
-        url: ""
+      connections: [],
+      status: "",
+      req: {
+        connectionName: "",
+        driver: "",
+        connectionString: "",
+        schema: "",
+        userName: "",
+        userPassword: "",
+        valid: false
       },
-      isLoaded: true
+      isLoaded: false
     };
     _this.handleInputChange = _this.handleInputChange.bind(_assertThisInitialized(_this));
+    _this.submitChange = _this.submitChange.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(Connections, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      fetch("/connections").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this2.setState({
+          isLoaded: true,
+          connections: result
+        });
+
+        console.log(result);
+      }, function (error) {
+        _this2.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+    }
+  }, {
     key: "handleInputChange",
     value: function handleInputChange(event) {
       var target = event.target;
@@ -38599,36 +38626,196 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       });
     }
   }, {
+    key: "submitChange",
+    value: function submitChange(event) {
+      var _this3 = this;
+
+      this.setState({
+        status: "Saving & testing the connection..."
+      });
+      fetch("/newConnection", {
+        method: 'POST',
+        body: JSON.stringify(this.state.req),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this3.setState({
+          isLoaded: true,
+          status: result.valid ? "Saved successfully." : "Connection test failed",
+          req: result
+        });
+      }, function (error) {
+        _this3.setState({
+          isLoaded: true,
+          status: "Save failed.",
+          error: error
+        });
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       if (this.state.isLoaded) {
+        var connections = this.state.connections.map(function (conn) {
+          return /*#__PURE__*/React.createElement("tr", {
+            key: conn.name
+          }, /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, conn.name), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, conn.url), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, conn.schema), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, conn.user), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, /*#__PURE__*/React.createElement("button", {
+            type: "button",
+            className: "btn btn-sm btn-secondary"
+          }, "test"), " ", /*#__PURE__*/React.createElement("button", {
+            type: "button",
+            className: "btn btn-sm btn-secondary"
+          }, "edit"), " ", /*#__PURE__*/React.createElement("button", {
+            type: "button",
+            className: "btn btn-sm btn-secondary"
+          }, "delete")));
+        });
+        var newConnModal = /*#__PURE__*/React.createElement("div", {
+          className: "modal fade",
+          id: "newConnModal",
+          tabIndex: "-1",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": true
+        }, /*#__PURE__*/React.createElement("div", {
+          className: "modal-dialog"
+        }, /*#__PURE__*/React.createElement("div", {
+          className: "modal-content"
+        }, /*#__PURE__*/React.createElement("div", {
+          className: "modal-header"
+        }, /*#__PURE__*/React.createElement("h5", {
+          className: "modal-title",
+          id: "newConnModalLabel"
+        }, "New Connection"), /*#__PURE__*/React.createElement("p", null, this.status), /*#__PURE__*/React.createElement("button", {
+          type: "button",
+          className: "btn-close",
+          "data-bs-dismiss": "modal",
+          "aria-label": "Close"
+        })), /*#__PURE__*/React.createElement("div", {
+          className: "modal-body"
+        }, /*#__PURE__*/React.createElement("form", null, /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "connectionName",
+          className: "form-label"
+        }, "Connection Name"), /*#__PURE__*/React.createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "connectionName",
+          "aria-describedby": "connectionNameHelp",
+          value: this.state.req.connectionName,
+          onChange: this.handleInputChange
+        })), /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "connectionString",
+          className: "form-label"
+        }, "Connection String"), /*#__PURE__*/React.createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "connectionString",
+          "aria-describedby": "connectionStringHelp",
+          value: this.state.req.connectionString,
+          onChange: this.handleInputChange
+        }), /*#__PURE__*/React.createElement("div", {
+          id: "connectionStringHelp",
+          className: "form-text"
+        }, "jdbc:mysql://eacloud-mysqlserver.mysql.database.azure.com:3306/eforms?useSSL=true")), /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "schema",
+          className: "form-label"
+        }, "Schema"), /*#__PURE__*/React.createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "schema",
+          "aria-describedby": "schemaHelp",
+          value: this.state.req.schema,
+          onChange: this.handleInputChange
+        })), /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "userName",
+          className: "form-label"
+        }, "User"), /*#__PURE__*/React.createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "userName",
+          "aria-describedby": "userNameHelp",
+          value: this.state.req.userName,
+          onChange: this.handleInputChange
+        })), /*#__PURE__*/React.createElement("div", {
+          className: "mb-3"
+        }, /*#__PURE__*/React.createElement("label", {
+          htmlFor: "userPassword",
+          className: "form-label"
+        }, "Password"), /*#__PURE__*/React.createElement("input", {
+          type: "password",
+          className: "form-control",
+          id: "userPassword",
+          value: this.state.req.userPassword,
+          onChange: this.handleInputChange
+        })))), /*#__PURE__*/React.createElement("div", {
+          className: "modal-footer"
+        }, /*#__PURE__*/React.createElement("button", {
+          type: "button",
+          className: "btn btn-primary",
+          onClick: this.submitChange,
+          disabled: this.state.req.valid
+        }, "Save"), /*#__PURE__*/React.createElement("button", {
+          type: "button",
+          className: "btn btn-secondary",
+          "data-bs-dismiss": "modal"
+        }, "Close")))));
         return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
           className: "row"
         }, /*#__PURE__*/React.createElement("div", {
           className: "col-lg-12"
-        }, "Button")), /*#__PURE__*/React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("h4", null, "Database Connections"), newConnModal, /*#__PURE__*/React.createElement("button", {
+          type: "button",
+          className: "btn btn-secondary",
+          "data-bs-toggle": "modal",
+          "data-bs-target": "#newConnModal"
+        }, /*#__PURE__*/React.createElement("svg", {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "16",
+          height: "16",
+          fill: "currentColor",
+          className: "bi bi-plus-circle",
+          viewBox: "0 0 16 16"
+        }, /*#__PURE__*/React.createElement("path", {
+          d: "M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: "M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+        })), " Add"))), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("div", {
           className: "row"
-        }, /*#__PURE__*/React.createElement("br", null), " ", /*#__PURE__*/React.createElement("div", {
+        }, /*#__PURE__*/React.createElement("div", {
           className: "col-lg-12"
         }, /*#__PURE__*/React.createElement("table", {
           className: "table"
         }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
           scope: "col"
-        }, "#"), /*#__PURE__*/React.createElement("th", {
-          scope: "col"
         }, "Name"), /*#__PURE__*/React.createElement("th", {
           scope: "col"
         }, "URL"), /*#__PURE__*/React.createElement("th", {
           scope: "col"
-        }, "User"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-          scope: "row"
-        }, "1"), /*#__PURE__*/React.createElement("td", null, "Mark"), /*#__PURE__*/React.createElement("td", null, "Otto"), /*#__PURE__*/React.createElement("td", null, "@mdo")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-          scope: "row"
-        }, "2"), /*#__PURE__*/React.createElement("td", null, "Jacob"), /*#__PURE__*/React.createElement("td", null, "Thornton"), /*#__PURE__*/React.createElement("td", null, "@fat")), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-          scope: "row"
-        }, "3"), /*#__PURE__*/React.createElement("td", {
-          colspan: "2"
-        }, "Larry the Bird"), /*#__PURE__*/React.createElement("td", null, "@twitter")))))));
+        }, "Schema"), /*#__PURE__*/React.createElement("th", {
+          scope: "col"
+        }, "User"), /*#__PURE__*/React.createElement("th", {
+          scope: "col"
+        }, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, connections)))));
       }
 
       return /*#__PURE__*/React.createElement("div", {
@@ -39135,7 +39322,7 @@ var Navigation = /*#__PURE__*/function (_React$Component) {
       }, /*#__PURE__*/React.createElement("a", {
         className: "nav-link",
         href: this.props.path + "/#/images/jackson"
-      }, "Excel DB")), /*#__PURE__*/React.createElement("li", {
+      }, "Images")), /*#__PURE__*/React.createElement("li", {
         className: "nav-item"
       }, /*#__PURE__*/React.createElement("a", {
         className: "nav-link disabled",

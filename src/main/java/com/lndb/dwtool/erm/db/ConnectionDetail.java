@@ -2,6 +2,7 @@ package com.lndb.dwtool.erm.db;
 
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lndb.dwtool.erm.ddl.Dialect;
 import com.lndb.dwtool.erm.ddl.HsqlDialect;
 import com.lndb.dwtool.erm.ddl.MySqlDialect;
@@ -83,6 +84,7 @@ public class ConnectionDetail {
 		return getUrl();
 	}
 
+	@JsonIgnore
 	public static ConnectionDetail configure(String con) {
 		Properties props = ConnectionRepository.loadProperties();
 		ConnectionDetail connectionDetail = new ConnectionDetail();
@@ -104,6 +106,7 @@ public class ConnectionDetail {
 		this.valid = valid;
 	}
 
+	@JsonIgnore
 	public String getHighlight() {
 		Integer integer = ConnectionRepository.FAILED_ATTEMPTS.get(getName());
 		if (integer == null || integer == 0) {
@@ -112,6 +115,7 @@ public class ConnectionDetail {
 		return "error";
 	}
 
+	@JsonIgnore
 	public Dialect getDialect() {
 		if (getDriver().toLowerCase().contains("oracle")) {
 			return new OracleDialect();
