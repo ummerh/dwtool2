@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.lndb.dwtool.erm.code.generator;
+package com.lndb.dwtool.erm.code;
 
 import java.util.List;
 

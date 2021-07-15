@@ -38678,7 +38678,7 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       }).then(function (result) {
         _this3.setState({
           saved: true,
-          status: result.valid ? "Saved successfully." : "Connection test failed",
+          status: result.valid ? "Saved successfully." : "Connection settings are not valid, please edit and re-submit.",
           req: result,
           connections: newConns
         });
@@ -38706,23 +38706,27 @@ var Connections = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "deleteConnection",
     value: function deleteConnection(idx, event) {
-      var connections = this.state.connections;
-      var req = this.state.connections[idx];
-      var filtered = connections.filter(function (value, index) {
-        return index != idx;
-      });
-      fetch("/connections", {
-        method: 'DELETE',
-        body: JSON.stringify(req),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      this.setState({
-        saved: true,
-        status: "Deleted",
-        connections: filtered
-      });
+      var cfm = confirm('Are you sure you want to delete the connection? It cannot be restored. Click OK to delete.');
+
+      if (cfm) {
+        var connections = this.state.connections;
+        var req = this.state.connections[idx];
+        var filtered = connections.filter(function (value, index) {
+          return index != idx;
+        });
+        fetch("/connections", {
+          method: 'DELETE',
+          body: JSON.stringify(req),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        this.setState({
+          saved: true,
+          status: "Deleted",
+          connections: filtered
+        });
+      }
     }
   }, {
     key: "render",
@@ -38745,9 +38749,6 @@ var Connections = /*#__PURE__*/function (_React$Component) {
           }, conn.userId), /*#__PURE__*/React.createElement("td", {
             scope: "row"
           }, /*#__PURE__*/React.createElement("button", {
-            type: "button",
-            className: "btn btn-sm btn-secondary"
-          }, "test"), " ", /*#__PURE__*/React.createElement("button", {
             type: "button",
             className: "btn btn-sm btn-secondary",
             onClick: updateConnection.bind(this, idx)

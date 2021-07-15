@@ -80,7 +80,7 @@ export class Connections extends React.Component {
 				(result) => {
 					this.setState({
 						saved: true,
-						status: result.valid ? "Saved successfully." : "Connection test failed",
+						status: result.valid ? "Saved successfully." : "Connection settings are not valid, please edit and re-submit.",
 						req: result,
 						connections: newConns
 					});
@@ -104,23 +104,26 @@ export class Connections extends React.Component {
 			keyboard: false
 		})
 		myModal.show();
-	}
+	}	
 	deleteConnection(idx, event) {
-		var connections = this.state.connections;
-		var req = this.state.connections[idx]
-		var filtered = connections.filter(function(value, index) {
-			return index != idx;
-		});
-		fetch("/connections", {
-			method: 'DELETE', body: JSON.stringify(req), headers: {
-				'Content-Type': 'application/json'
-			},
-		})
-		this.setState({
-			saved: true,
-			status: "Deleted",
-			connections: filtered
-		});
+		var cfm = confirm('Are you sure you want to delete the connection? It cannot be restored. Click OK to delete.');
+		if (cfm) {
+			var connections = this.state.connections;
+			var req = this.state.connections[idx]
+			var filtered = connections.filter(function(value, index) {
+				return index != idx;
+			});
+			fetch("/connections", {
+				method: 'DELETE', body: JSON.stringify(req), headers: {
+					'Content-Type': 'application/json'
+				},
+			})
+			this.setState({
+				saved: true,
+				status: "Deleted",
+				connections: filtered
+			});
+		}
 	}
 	render() {
 		var updateConnection = this.updateConnection;
@@ -132,7 +135,7 @@ export class Connections extends React.Component {
 					<td scope="row">{conn.url}</td>
 					<td scope="row">{conn.schema}</td>
 					<td scope="row">{conn.userId}</td>
-					<td scope="row"><button type="button" className="btn btn-sm btn-secondary">test</button> <button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button> <button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
+					<td scope="row"><button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button> <button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
 				</tr>);
 			}
 			);

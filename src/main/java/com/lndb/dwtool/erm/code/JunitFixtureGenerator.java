@@ -1,4 +1,4 @@
-package com.lndb.dwtool.erm.code.generator;
+package com.lndb.dwtool.erm.code;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
