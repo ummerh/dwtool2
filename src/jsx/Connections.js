@@ -4,7 +4,7 @@ import {
 	HashRouter as Router,
 	Switch,
 	Link,
-	Route
+	Route	
 } from "react-router-dom";
 
 export class Connections extends React.Component {
@@ -130,12 +130,18 @@ export class Connections extends React.Component {
 		var deleteConnection = this.deleteConnection;
 		if (this.state.isLoaded) {
 			var connections = this.state.connections.map(function(conn, idx) {
+				var viewTables = <Link className="btn btn-sm btn-secondary" role="button" to={`/connections/view/${conn.name}`}>View Tables</Link>
 				return (<tr key={conn.name}>
 					<td scope="row">{conn.name}</td>
 					<td scope="row">{conn.url}</td>
 					<td scope="row">{conn.schema}</td>
 					<td scope="row">{conn.userId}</td>
-					<td scope="row"><button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button> <button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
+					<td scope="row">
+					{viewTables}
+					{'\u000A'}
+					<button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button>
+					{'\u000A'} 
+					<button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
 				</tr>);
 			}
 			);

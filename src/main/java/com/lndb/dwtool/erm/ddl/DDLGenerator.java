@@ -23,7 +23,7 @@ import com.lndb.dwtool.erm.ojb.ClassDescriptor;
 import com.lndb.dwtool.erm.ojb.OJBMap;
 
 public class DDLGenerator {
-	private OJBMap ojbMap;
+	private OJBMap ojbMap = new OJBMap();
 
 	private DBMap dbMap;
 
@@ -87,7 +87,7 @@ public class DDLGenerator {
 		ddlBuf.append(LINE_BREAK);
 		ddlBuf.append(");");
 		ddlBuf.append(LINE_BREAK);
-		return ddlBuf.toString();
+		return ddlBuf.toString().toLowerCase();
 	}
 
 	private void generatePKRelationshipsInline(String tblName, StringBuilder ddlBuf) {

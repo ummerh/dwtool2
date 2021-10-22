@@ -20,7 +20,7 @@ export class HomeWindow extends React.Component {
 									{'  '}Source Code</a>
 
 							</p>
-							<p className="lead text-muted">DW Tools app allows you to configure a connection to supported RDBMS systems. Once the connection is established successfully, it can assist you with the schema explorations, schema comparisons, and generate code or assist in development activities like DDL generation, DDL Diff generation and extend further to provide HDFS based equivalent scripts.</p>
+							<p className="lead text-muted">DW Tools allows you to configure a connection to supported RDBMS systems. Once the connection is established successfully, it can assist you with the schema explorations, schema comparisons, and generate code or assist in development activities like DDL generation, DDL Diff generation and extend further to provide HDFS based equivalent scripts.</p>
 						</div>
 					</section>					
 					<div className="container">

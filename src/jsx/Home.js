@@ -5,6 +5,8 @@ const Navigation = require("./Navigation.js").Navigation;
 const Connections = require("./Connections.js").Connections;
 const JacksonGallery = require("./JacksonGallery.js").JacksonGallery;
 const LoginForm = require("./LoginForm.js").LoginForm;
+const TablesListView = require("./TablesListView.js").TablesListView;
+const TableDescriptorView = require("./TableDescriptorView.js").TableDescriptorView;
 
 import {
 	HashRouter as Router,
@@ -25,9 +27,7 @@ export class Home extends React.Component {
 						<Route path="/connections" exact>
 							<Connections />
 						</Route>
-						<Route path="/images/jackson" exact>
-							<JacksonGallery />
-						</Route>
+						<Route path={`/connections/view/:connectionName`} exact render={(props) => <TablesListView {...props} />} />
 						<Route path="/user/login" exact>
 							<LoginForm />
 						</Route>						

@@ -62,7 +62,7 @@ public class OJBMap extends RelationalMap {
 	private HashMap<String, List<ReferenceDescriptor>> inverseReferences = new HashMap<String, List<ReferenceDescriptor>>();
 	private boolean loaded;
 
-	protected OJBMap() {
+	public OJBMap() {
 		super();
 	}
 

@@ -38736,6 +38736,11 @@ var Connections = /*#__PURE__*/function (_React$Component) {
 
       if (this.state.isLoaded) {
         var connections = this.state.connections.map(function (conn, idx) {
+          var viewTables = /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__["Link"], {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            to: "/connections/view/".concat(conn.name)
+          }, "View Tables");
           return /*#__PURE__*/React.createElement("tr", {
             key: conn.name
           }, /*#__PURE__*/React.createElement("td", {
@@ -38748,11 +38753,11 @@ var Connections = /*#__PURE__*/function (_React$Component) {
             scope: "row"
           }, conn.userId), /*#__PURE__*/React.createElement("td", {
             scope: "row"
-          }, /*#__PURE__*/React.createElement("button", {
+          }, viewTables, "\n", /*#__PURE__*/React.createElement("button", {
             type: "button",
             className: "btn btn-sm btn-secondary",
             onClick: updateConnection.bind(this, idx)
-          }, "edit"), " ", /*#__PURE__*/React.createElement("button", {
+          }, "edit"), "\n", /*#__PURE__*/React.createElement("button", {
             type: "button",
             className: "btn btn-sm btn-secondary",
             onClick: deleteConnection.bind(this, idx)
@@ -38954,6 +38959,10 @@ var JacksonGallery = __webpack_require__(/*! ./JacksonGallery.js */ "./src/jsx/J
 
 var LoginForm = __webpack_require__(/*! ./LoginForm.js */ "./src/jsx/LoginForm.js").LoginForm;
 
+var TablesListView = __webpack_require__(/*! ./TablesListView.js */ "./src/jsx/TablesListView.js").TablesListView;
+
+var TableDescriptorView = __webpack_require__(/*! ./TableDescriptorView.js */ "./src/jsx/TableDescriptorView.js").TableDescriptorView;
+
 
 var Home = /*#__PURE__*/function (_React$Component) {
   _inherits(Home, _React$Component);
@@ -38978,9 +38987,12 @@ var Home = /*#__PURE__*/function (_React$Component) {
         path: "/connections",
         exact: true
       }, /*#__PURE__*/React.createElement(Connections, null)), /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__["Route"], {
-        path: "/images/jackson",
-        exact: true
-      }, /*#__PURE__*/React.createElement(JacksonGallery, null)), /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__["Route"], {
+        path: "/connections/view/:connectionName",
+        exact: true,
+        render: function render(props) {
+          return /*#__PURE__*/React.createElement(TablesListView, props);
+        }
+      }), /*#__PURE__*/React.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_0__["Route"], {
         path: "/user/login",
         exact: true
       }, /*#__PURE__*/React.createElement(LoginForm, null)))));
@@ -39072,7 +39084,7 @@ var HomeWindow = /*#__PURE__*/function (_React$Component) {
         d: "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
       })), '  ', "Source Code")), /*#__PURE__*/React.createElement("p", {
         className: "lead text-muted"
-      }, "DW Tools app allows you to configure a connection to supported RDBMS systems. Once the connection is established successfully, it can assist you with the schema explorations, schema comparisons, and generate code or assist in development activities like DDL generation, DDL Diff generation and extend further to provide HDFS based equivalent scripts."))), /*#__PURE__*/React.createElement("div", {
+      }, "DW Tools allows you to configure a connection to supported RDBMS systems. Once the connection is established successfully, it can assist you with the schema explorations, schema comparisons, and generate code or assist in development activities like DDL generation, DDL Diff generation and extend further to provide HDFS based equivalent scripts."))), /*#__PURE__*/React.createElement("div", {
         className: "container"
       }, /*#__PURE__*/React.createElement("div", {
         className: "row"
@@ -39395,11 +39407,6 @@ var Navigation = /*#__PURE__*/function (_React$Component) {
       }, "Connections")), /*#__PURE__*/React.createElement("li", {
         className: "nav-item"
       }, /*#__PURE__*/React.createElement("a", {
-        className: "nav-link",
-        href: this.props.path + "/#/images/jackson"
-      }, "Images")), /*#__PURE__*/React.createElement("li", {
-        className: "nav-item"
-      }, /*#__PURE__*/React.createElement("a", {
         className: "nav-link disabled",
         href: "#",
         "aria-disabled": "true"
@@ -39418,6 +39425,280 @@ var Navigation = /*#__PURE__*/function (_React$Component) {
   }]);
 
   return Navigation;
+}(React.Component);
+
+/***/ }),
+
+/***/ "./src/jsx/TableDescriptorView.js":
+/*!****************************************!*\
+  !*** ./src/jsx/TableDescriptorView.js ***!
+  \****************************************/
+/*! exports provided: TableDescriptorView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TableDescriptorView", function() { return TableDescriptorView; });
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+
+
+var TableDescriptorView = /*#__PURE__*/function (_React$Component) {
+  _inherits(TableDescriptorView, _React$Component);
+
+  var _super = _createSuper(TableDescriptorView);
+
+  function TableDescriptorView(props) {
+    _classCallCheck(this, TableDescriptorView);
+
+    return _super.call(this, props);
+  }
+
+  _createClass(TableDescriptorView, [{
+    key: "render",
+    value: function render() {
+      var colsList = null;
+
+      if (this.props.tabl.columns) {
+        colsList = this.props.tabl.columns.map(function (col, idx) {
+          return /*#__PURE__*/React.createElement("tr", {
+            key: col.name
+          }, /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, col.name), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, col.typeName), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, col.size), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, col.nullable ? "true" : ""), /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, col.decimalDigits));
+        });
+      }
+
+      return /*#__PURE__*/React.createElement("div", {
+        className: "modal fade",
+        id: "tableDescView",
+        tabIndex: "-1",
+        "aria-labelledby": "tableDescView",
+        "aria-hidden": true
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-dialog"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-content"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-header"
+      }, /*#__PURE__*/React.createElement("h5", {
+        className: "modal-title",
+        id: "tableDescView"
+      }, "Table - ", this.props.tabl.tableName), /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn-close",
+        "data-bs-dismiss": "modal",
+        "aria-label": "Close"
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "modal-body"
+      }, /*#__PURE__*/React.createElement("table", {
+        className: "table table-striped table-hover"
+      }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Name"), /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Type"), /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Size"), /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Nullable"), /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Precision"))), /*#__PURE__*/React.createElement("tbody", null, colsList))), /*#__PURE__*/React.createElement("div", {
+        className: "modal-footer"
+      }, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn btn-secondary",
+        "data-bs-dismiss": "modal"
+      }, "Close")))));
+    }
+  }]);
+
+  return TableDescriptorView;
+}(React.Component);
+
+/***/ }),
+
+/***/ "./src/jsx/TablesListView.js":
+/*!***********************************!*\
+  !*** ./src/jsx/TablesListView.js ***!
+  \***********************************/
+/*! exports provided: TablesListView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TablesListView", function() { return TablesListView; });
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+
+
+
+var TableDescriptorView = __webpack_require__(/*! ./TableDescriptorView.js */ "./src/jsx/TableDescriptorView.js").TableDescriptorView;
+
+var TablesListView = /*#__PURE__*/function (_React$Component) {
+  _inherits(TablesListView, _React$Component);
+
+  var _super = _createSuper(TablesListView);
+
+  function TablesListView(props) {
+    var _this;
+
+    _classCallCheck(this, TablesListView);
+
+    _this = _super.call(this, props);
+    _this.state = {
+      isLoaded: false,
+      tables: [],
+      tabl: {
+        tableName: ""
+      }
+    };
+    _this.viewTable = _this.viewTable.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(TablesListView, [{
+    key: "viewTable",
+    value: function viewTable(idx) {
+      var tablV = this.state.tables[idx];
+      console.log(tablV);
+      this.setState({
+        tabl: tablV
+      }, function () {
+        var myModal = new bootstrap.Modal(document.getElementById('tableDescView'), {
+          keyboard: false
+        });
+        myModal.show();
+      });
+      return false;
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var connectionName = this.props.match.params.connectionName;
+      fetch("/connections/" + connectionName + "/tables").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this2.setState({
+          isLoaded: true,
+          tables: result
+        });
+      }, function (error) {
+        _this2.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var props = this.props;
+      var connectionName = this.props.match.params.connectionName;
+      var viewTable = this.viewTable;
+
+      if (this.state.isLoaded) {
+        console.log(this.state.tables);
+        var tablesList = this.state.tables.map(function (tabl, idx) {
+          return /*#__PURE__*/React.createElement("tr", {
+            key: tabl.tableName
+          }, /*#__PURE__*/React.createElement("td", {
+            scope: "row"
+          }, tabl.tableName), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("button", {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            onClick: viewTable.bind(this, idx)
+          }, "View"), "\n", /*#__PURE__*/React.createElement("a", {
+            className: "btn btn-sm btn-secondary",
+            target: "_blank",
+            role: "button",
+            href: "/connections/".concat(connectionName, "/tables/").concat(tabl.tableName, "/ddl")
+          }, "DB DDL"), "\n", /*#__PURE__*/React.createElement("a", {
+            className: "btn btn-sm btn-secondary",
+            target: "_blank",
+            role: "button",
+            href: "/connections/".concat(connectionName, "/tables/").concat(tabl.tableName, "/hive")
+          }, "Hive DDL")));
+        });
+        return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TableDescriptorView, {
+          tabl: this.state.tabl
+        }), /*#__PURE__*/React.createElement("h4", null, "Connection: ", connectionName), /*#__PURE__*/React.createElement("table", {
+          className: "table table-striped table-hover"
+        }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+          scope: "col"
+        }, "Table Name"), /*#__PURE__*/React.createElement("th", {
+          scope: "col"
+        }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, tablesList)));
+      }
+
+      return /*#__PURE__*/React.createElement("div", {
+        className: "spinner-border",
+        role: "status"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "sr-only"
+      }, "Loading..."));
+    }
+  }]);
+
+  return TablesListView;
 }(React.Component);
 
 /***/ }),
