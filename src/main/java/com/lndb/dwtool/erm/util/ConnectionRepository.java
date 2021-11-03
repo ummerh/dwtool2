@@ -101,7 +101,7 @@ public class ConnectionRepository {
 			}
 		}
 		properties.put(PROPERTY_CONNECTIONS, conNameList);
-		properties.put(conName + "." + PROP_DRIVER, "com.mysql.jdbc.Driver");
+		properties.put(conName + "." + PROP_DRIVER, "com.mysql.cj.jdbc.Driver");
 		properties.put(conName + "." + PROP_URL, spec.getUrl());
 		properties.put(conName + "." + PROP_SCHEMA, spec.getSchema());
 		properties.put(conName + "." + PROP_USER, spec.getUserId());

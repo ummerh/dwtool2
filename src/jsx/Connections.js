@@ -4,19 +4,24 @@ import {
 	HashRouter as Router,
 	Switch,
 	Link,
-	Route	
+	Route
 } from "react-router-dom";
+const StringListModal = require("./StringListModal.js").StringListModal;
+const SqlDDLView = require("./SqlDDLView.js").SqlDDLView;
 
 export class Connections extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { connections: [], status: "", req: { name: "", driver: "", url: "", schema: "", userId: "", password: "", valid: false }, saved: false, isLoaded: false };
+		this.state = { connections: [], status: "", req: { name: "", driver: "", url: "", schema: "", userId: "", password: "", valid: false }, saved: false, isLoaded: false, list: [], listName: "", ddl: "" };
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.submitChange = this.submitChange.bind(this);
 		this.updateConnection = this.updateConnection.bind(this);
 		this.deleteConnection = this.deleteConnection.bind(this);
 		this.resetModal = this.resetModal.bind(this);
+		this.viewList = this.viewList.bind(this);
+		this.viewDDL = this.viewDDL.bind(this);
+		this.viewHiveDDL = this.viewHiveDDL.bind(this);
 	}
 
 	componentDidMount() {
@@ -36,6 +41,87 @@ export class Connections extends React.Component {
 					});
 				}
 			)
+	}
+	viewList(idx) {
+		var newReq = this.state.connections[idx];
+		fetch("/connections/" + newReq.name + "/loadorder")
+			.then(res => res.json())
+			.then(
+				(result) => {
+					this.setState({
+						isLoaded: true,
+						list: result
+					},
+						function() {
+							var myModal = new bootstrap.Modal(document.getElementById('stringListModal'), {
+								keyboard: false
+							})
+							myModal.show();
+						}
+					);
+				},
+				(error) => {
+					this.setState({
+						isLoaded: true,
+						error
+					});
+				}
+			)
+		return;
+	}
+	viewDDL(idx) {
+		var newReq = this.state.connections[idx];
+		fetch("/connections/" + newReq.name + "/ddl")
+			.then(res => res.json())
+			.then(
+				(result) => {
+					this.setState({
+						isLoaded: true,
+						ddl: result.value
+					},
+						function() {
+							var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+								keyboard: false
+							})
+							myModal.show();
+						}
+					);
+				},
+				(error) => {
+					this.setState({
+						isLoaded: true,
+						error
+					});
+				}
+			)
+		return;
+	}
+	viewHiveDDL(idx) {
+		var newReq = this.state.connections[idx];
+		fetch("/connections/" + newReq.name + "/hive")
+			.then(res => res.json())
+			.then(
+				(result) => {
+					this.setState({
+						isLoaded: true,
+						ddl: result.value
+					},
+						function() {
+							var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+								keyboard: false
+							})
+							myModal.show();
+						}
+					);
+				},
+				(error) => {
+					this.setState({
+						isLoaded: true,
+						error
+					});
+				}
+			)
+		return;
 	}
 	resetModal(event) {
 		var myModal = new bootstrap.Modal(document.getElementById('newConnModal'), {
@@ -104,7 +190,7 @@ export class Connections extends React.Component {
 			keyboard: false
 		})
 		myModal.show();
-	}	
+	}
 	deleteConnection(idx, event) {
 		var cfm = confirm('Are you sure you want to delete the connection? It cannot be restored. Click OK to delete.');
 		if (cfm) {
@@ -128,6 +214,9 @@ export class Connections extends React.Component {
 	render() {
 		var updateConnection = this.updateConnection;
 		var deleteConnection = this.deleteConnection;
+		var viewList = this.viewList;
+		var viewDDL = this.viewDDL;
+		var viewHiveDDL = this.viewHiveDDL;
 		if (this.state.isLoaded) {
 			var connections = this.state.connections.map(function(conn, idx) {
 				var viewTables = <Link className="btn btn-sm btn-secondary" role="button" to={`/connections/view/${conn.name}`}>View Tables</Link>
@@ -137,11 +226,17 @@ export class Connections extends React.Component {
 					<td scope="row">{conn.schema}</td>
 					<td scope="row">{conn.userId}</td>
 					<td scope="row">
-					{viewTables}
-					{'\u000A'}
-					<button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button>
-					{'\u000A'} 
-					<button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
+						{viewTables}
+						{'\u000A'}
+						<button className="btn btn-sm btn-secondary" role="button" onClick={viewList.bind(this, idx)} >Load Order</button>
+						{'\u000A'}
+						<button className="btn btn-sm btn-secondary" role="button" onClick={viewDDL.bind(this, idx)} >DDL</button>
+						{'\u000A'}
+						<button className="btn btn-sm btn-secondary" role="button" onClick={viewHiveDDL.bind(this, idx)} >Hive DDL</button>
+						{'\u000A'}
+						<button type="button" className="btn btn-sm btn-secondary" onClick={updateConnection.bind(this, idx)}>edit</button>
+						{'\u000A'}
+						<button type="button" className="btn btn-sm btn-secondary" onClick={deleteConnection.bind(this, idx)} >delete</button></td>
 				</tr>);
 			}
 			);
@@ -189,6 +284,8 @@ export class Connections extends React.Component {
 				</div>
 			);
 			return (<div>
+				<StringListModal list={this.state.list} listName={this.state.listName} />
+				<SqlDDLView ddl={this.state.ddl} />
 				<div className="row" ><div className="col-lg-12">
 					<h4>Database Connections</h4>
 					{newConnModal}

@@ -38562,6 +38562,11 @@ var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
 
 
+
+var StringListModal = __webpack_require__(/*! ./StringListModal.js */ "./src/jsx/StringListModal.js").StringListModal;
+
+var SqlDDLView = __webpack_require__(/*! ./SqlDDLView.js */ "./src/jsx/SqlDDLView.js").SqlDDLView;
+
 var Connections = /*#__PURE__*/function (_React$Component) {
   _inherits(Connections, _React$Component);
 
@@ -38586,13 +38591,19 @@ var Connections = /*#__PURE__*/function (_React$Component) {
         valid: false
       },
       saved: false,
-      isLoaded: false
+      isLoaded: false,
+      list: [],
+      listName: "",
+      ddl: ""
     };
     _this.handleInputChange = _this.handleInputChange.bind(_assertThisInitialized(_this));
     _this.submitChange = _this.submitChange.bind(_assertThisInitialized(_this));
     _this.updateConnection = _this.updateConnection.bind(_assertThisInitialized(_this));
     _this.deleteConnection = _this.deleteConnection.bind(_assertThisInitialized(_this));
     _this.resetModal = _this.resetModal.bind(_assertThisInitialized(_this));
+    _this.viewList = _this.viewList.bind(_assertThisInitialized(_this));
+    _this.viewDDL = _this.viewDDL.bind(_assertThisInitialized(_this));
+    _this.viewHiveDDL = _this.viewHiveDDL.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -38614,6 +38625,84 @@ var Connections = /*#__PURE__*/function (_React$Component) {
           error: error
         });
       });
+    }
+  }, {
+    key: "viewList",
+    value: function viewList(idx) {
+      var _this3 = this;
+
+      var newReq = this.state.connections[idx];
+      fetch("/connections/" + newReq.name + "/loadorder").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this3.setState({
+          isLoaded: true,
+          list: result
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('stringListModal'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this3.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
+    }
+  }, {
+    key: "viewDDL",
+    value: function viewDDL(idx) {
+      var _this4 = this;
+
+      var newReq = this.state.connections[idx];
+      fetch("/connections/" + newReq.name + "/ddl").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this4.setState({
+          isLoaded: true,
+          ddl: result.value
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this4.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
+    }
+  }, {
+    key: "viewHiveDDL",
+    value: function viewHiveDDL(idx) {
+      var _this5 = this;
+
+      var newReq = this.state.connections[idx];
+      fetch("/connections/" + newReq.name + "/hive").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this5.setState({
+          isLoaded: true,
+          ddl: result.value
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this5.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
     }
   }, {
     key: "resetModal",
@@ -38651,7 +38740,7 @@ var Connections = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "submitChange",
     value: function submitChange(event) {
-      var _this3 = this;
+      var _this6 = this;
 
       this.setState({
         status: "Saving & testing the connection..."
@@ -38676,14 +38765,14 @@ var Connections = /*#__PURE__*/function (_React$Component) {
       }).then(function (res) {
         return res.json();
       }).then(function (result) {
-        _this3.setState({
+        _this6.setState({
           saved: true,
           status: result.valid ? "Saved successfully." : "Connection settings are not valid, please edit and re-submit.",
           req: result,
           connections: newConns
         });
       }, function (error) {
-        _this3.setState({
+        _this6.setState({
           saved: false,
           status: "Save failed.",
           error: error
@@ -38733,6 +38822,9 @@ var Connections = /*#__PURE__*/function (_React$Component) {
     value: function render() {
       var updateConnection = this.updateConnection;
       var deleteConnection = this.deleteConnection;
+      var viewList = this.viewList;
+      var viewDDL = this.viewDDL;
+      var viewHiveDDL = this.viewHiveDDL;
 
       if (this.state.isLoaded) {
         var connections = this.state.connections.map(function (conn, idx) {
@@ -38754,6 +38846,18 @@ var Connections = /*#__PURE__*/function (_React$Component) {
           }, conn.userId), /*#__PURE__*/React.createElement("td", {
             scope: "row"
           }, viewTables, "\n", /*#__PURE__*/React.createElement("button", {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            onClick: viewList.bind(this, idx)
+          }, "Load Order"), "\n", /*#__PURE__*/React.createElement("button", {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            onClick: viewDDL.bind(this, idx)
+          }, "DDL"), "\n", /*#__PURE__*/React.createElement("button", {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            onClick: viewHiveDDL.bind(this, idx)
+          }, "Hive DDL"), "\n", /*#__PURE__*/React.createElement("button", {
             type: "button",
             className: "btn btn-sm btn-secondary",
             onClick: updateConnection.bind(this, idx)
@@ -38860,7 +38964,12 @@ var Connections = /*#__PURE__*/function (_React$Component) {
           className: "btn btn-secondary",
           "data-bs-dismiss": "modal"
         }, "Close")))));
-        return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+        return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(StringListModal, {
+          list: this.state.list,
+          listName: this.state.listName
+        }), /*#__PURE__*/React.createElement(SqlDDLView, {
+          ddl: this.state.ddl
+        }), /*#__PURE__*/React.createElement("div", {
           className: "row"
         }, /*#__PURE__*/React.createElement("div", {
           className: "col-lg-12"
@@ -39429,6 +39538,195 @@ var Navigation = /*#__PURE__*/function (_React$Component) {
 
 /***/ }),
 
+/***/ "./src/jsx/SqlDDLView.js":
+/*!*******************************!*\
+  !*** ./src/jsx/SqlDDLView.js ***!
+  \*******************************/
+/*! exports provided: SqlDDLView */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SqlDDLView", function() { return SqlDDLView; });
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+
+
+var SqlDDLView = /*#__PURE__*/function (_React$Component) {
+  _inherits(SqlDDLView, _React$Component);
+
+  var _super = _createSuper(SqlDDLView);
+
+  function SqlDDLView(props) {
+    _classCallCheck(this, SqlDDLView);
+
+    return _super.call(this, props);
+  }
+
+  _createClass(SqlDDLView, [{
+    key: "render",
+    value: function render() {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "modal fade",
+        id: "ddlDescView",
+        tabIndex: "-1",
+        "aria-labelledby": "ddlDescView",
+        "aria-hidden": true
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-dialog"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-content"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-header"
+      }, /*#__PURE__*/React.createElement("h5", {
+        className: "modal-title",
+        id: "ddlDescView"
+      }, "Definition"), /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn-close",
+        "data-bs-dismiss": "modal",
+        "aria-label": "Close"
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "modal-body"
+      }, /*#__PURE__*/React.createElement("pre", null, this.props.ddl)), /*#__PURE__*/React.createElement("div", {
+        className: "modal-footer"
+      }, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn btn-secondary",
+        "data-bs-dismiss": "modal"
+      }, "Close")))));
+    }
+  }]);
+
+  return SqlDDLView;
+}(React.Component);
+
+/***/ }),
+
+/***/ "./src/jsx/StringListModal.js":
+/*!************************************!*\
+  !*** ./src/jsx/StringListModal.js ***!
+  \************************************/
+/*! exports provided: StringListModal */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "StringListModal", function() { return StringListModal; });
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+
+
+var StringListModal = /*#__PURE__*/function (_React$Component) {
+  _inherits(StringListModal, _React$Component);
+
+  var _super = _createSuper(StringListModal);
+
+  function StringListModal(props) {
+    _classCallCheck(this, StringListModal);
+
+    return _super.call(this, props);
+  }
+
+  _createClass(StringListModal, [{
+    key: "render",
+    value: function render() {
+      var listView = this.props.list.map(function (val, idx) {
+        return /*#__PURE__*/React.createElement("tr", {
+          key: val
+        }, /*#__PURE__*/React.createElement("td", {
+          scope: "row"
+        }, val));
+      });
+      return /*#__PURE__*/React.createElement("div", {
+        className: "modal fade",
+        id: "stringListModal",
+        tabIndex: "-1",
+        "aria-labelledby": "stringListModal",
+        "aria-hidden": true
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-dialog"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-content"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "modal-header"
+      }, /*#__PURE__*/React.createElement("h5", {
+        className: "modal-title",
+        id: "stringListModal"
+      }, this.props.listName), /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn-close",
+        "data-bs-dismiss": "modal",
+        "aria-label": "Close"
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "modal-body"
+      }, /*#__PURE__*/React.createElement("table", {
+        className: "table table-striped table-hover"
+      }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+        scope: "col"
+      }, "Value"))), /*#__PURE__*/React.createElement("tbody", null, listView))), /*#__PURE__*/React.createElement("div", {
+        className: "modal-footer"
+      }, /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        className: "btn btn-secondary",
+        "data-bs-dismiss": "modal"
+      }, "Close")))));
+    }
+  }]);
+
+  return StringListModal;
+}(React.Component);
+
+/***/ }),
+
 /***/ "./src/jsx/TableDescriptorView.js":
 /*!****************************************!*\
   !*** ./src/jsx/TableDescriptorView.js ***!
@@ -39591,6 +39889,10 @@ var ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/in
 
 var TableDescriptorView = __webpack_require__(/*! ./TableDescriptorView.js */ "./src/jsx/TableDescriptorView.js").TableDescriptorView;
 
+var SqlDDLView = __webpack_require__(/*! ./SqlDDLView.js */ "./src/jsx/SqlDDLView.js").SqlDDLView;
+
+var StringListModal = __webpack_require__(/*! ./StringListModal.js */ "./src/jsx/StringListModal.js").StringListModal;
+
 var TablesListView = /*#__PURE__*/function (_React$Component) {
   _inherits(TablesListView, _React$Component);
 
@@ -39607,9 +39909,15 @@ var TablesListView = /*#__PURE__*/function (_React$Component) {
       tables: [],
       tabl: {
         tableName: ""
-      }
+      },
+      ddl: "",
+      list: [],
+      listName: ""
     };
     _this.viewTable = _this.viewTable.bind(_assertThisInitialized(_this));
+    _this.viewDDL = _this.viewDDL.bind(_assertThisInitialized(_this));
+    _this.viewHiveDDL = _this.viewHiveDDL.bind(_assertThisInitialized(_this));
+    _this.viewList = _this.viewList.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -39617,7 +39925,6 @@ var TablesListView = /*#__PURE__*/function (_React$Component) {
     key: "viewTable",
     value: function viewTable(idx) {
       var tablV = this.state.tables[idx];
-      console.log(tablV);
       this.setState({
         tabl: tablV
       }, function () {
@@ -39629,20 +39936,101 @@ var TablesListView = /*#__PURE__*/function (_React$Component) {
       return false;
     }
   }, {
+    key: "viewList",
+    value: function viewList(idx) {
+      var _this2 = this;
+
+      var tablV = this.state.tables[idx];
+      var connectionName = this.props.match.params.connectionName;
+      fetch("/connections/" + connectionName + "/tables/" + tablV.tableName + "/loadorder").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this2.setState({
+          isLoaded: true,
+          list: result
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('stringListModal'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this2.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
+    }
+  }, {
+    key: "viewDDL",
+    value: function viewDDL(idx) {
+      var _this3 = this;
+
+      var tablV = this.state.tables[idx];
+      var connectionName = this.props.match.params.connectionName;
+      fetch("/connections/" + connectionName + "/tables/" + tablV.tableName + "/ddl").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this3.setState({
+          isLoaded: true,
+          ddl: result.value
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this3.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
+    }
+  }, {
+    key: "viewHiveDDL",
+    value: function viewHiveDDL(idx) {
+      var _this4 = this;
+
+      var tablV = this.state.tables[idx];
+      var connectionName = this.props.match.params.connectionName;
+      fetch("/connections/" + connectionName + "/tables/" + tablV.tableName + "/hive").then(function (res) {
+        return res.json();
+      }).then(function (result) {
+        _this4.setState({
+          isLoaded: true,
+          ddl: result.value
+        }, function () {
+          var myModal = new bootstrap.Modal(document.getElementById('ddlDescView'), {
+            keyboard: false
+          });
+          myModal.show();
+        });
+      }, function (error) {
+        _this4.setState({
+          isLoaded: true,
+          error: error
+        });
+      });
+      return;
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this2 = this;
+      var _this5 = this;
 
       var connectionName = this.props.match.params.connectionName;
       fetch("/connections/" + connectionName + "/tables").then(function (res) {
         return res.json();
       }).then(function (result) {
-        _this2.setState({
+        _this5.setState({
           isLoaded: true,
           tables: result
         });
       }, function (error) {
-        _this2.setState({
+        _this5.setState({
           isLoaded: true,
           error: error
         });
@@ -39654,9 +40042,11 @@ var TablesListView = /*#__PURE__*/function (_React$Component) {
       var props = this.props;
       var connectionName = this.props.match.params.connectionName;
       var viewTable = this.viewTable;
+      var viewDDL = this.viewDDL;
+      var viewHiveDDL = this.viewHiveDDL;
+      var viewList = this.viewList;
 
       if (this.state.isLoaded) {
-        console.log(this.state.tables);
         var tablesList = this.state.tables.map(function (tabl, idx) {
           return /*#__PURE__*/React.createElement("tr", {
             key: tabl.tableName
@@ -39666,20 +40056,30 @@ var TablesListView = /*#__PURE__*/function (_React$Component) {
             className: "btn btn-sm btn-secondary",
             role: "button",
             onClick: viewTable.bind(this, idx)
-          }, "View"), "\n", /*#__PURE__*/React.createElement("a", {
+          }, "View"), "\n", /*#__PURE__*/React.createElement("button", {
             className: "btn btn-sm btn-secondary",
-            target: "_blank",
             role: "button",
-            href: "/connections/".concat(connectionName, "/tables/").concat(tabl.tableName, "/ddl")
-          }, "DB DDL"), "\n", /*#__PURE__*/React.createElement("a", {
+            onClick: viewList.bind(this, idx)
+          }, "Load Order"), "\n", /*#__PURE__*/React.createElement("button", {
             className: "btn btn-sm btn-secondary",
-            target: "_blank",
             role: "button",
-            href: "/connections/".concat(connectionName, "/tables/").concat(tabl.tableName, "/hive")
+            onClick: viewDDL.bind(this, idx)
+          }, "DDL"), "\n", /*#__PURE__*/React.createElement("button", {
+            className: "btn btn-sm btn-secondary",
+            role: "button",
+            onClick: viewHiveDDL.bind(this, idx)
           }, "Hive DDL")));
         });
         return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(TableDescriptorView, {
+          connectionName: connectionName,
           tabl: this.state.tabl
+        }), /*#__PURE__*/React.createElement(SqlDDLView, {
+          connectionName: connectionName,
+          tabl: this.state.tabl,
+          ddl: this.state.ddl
+        }), /*#__PURE__*/React.createElement(StringListModal, {
+          list: this.state.list,
+          listName: this.state.listName
         }), /*#__PURE__*/React.createElement("h4", null, "Connection: ", connectionName), /*#__PURE__*/React.createElement("table", {
           className: "table table-striped table-hover"
         }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
